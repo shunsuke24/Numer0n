@@ -1,0 +1,109 @@
+#include <iostream>
+#include <string>//string
+#include <algorithm>//sort
+#include <vector>
+#include <sstream>
+#include <iterator>
+using namespace std;
+
+//数の重複を確認する関数
+bool duplication(string s)
+{
+    sort(s.begin(), s.end());
+    return adjacent_find(s.begin(), s.end()) != s.end();
+}
+
+//ゲームを行うクラス
+struct CGame
+{
+    void game()
+    {
+        typedef size_t index;
+        //vectorに10個の数を用意
+        vector<int> vec{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        //vectorの中身をランダムに並び替える
+        random_shuffle(vec.begin(), vec.end());
+        //文字列ストリームとイテレータベースのforループを用いて
+        //vectorを文字列に変換する
+        stringstream ss;
+        for (auto it = vec.begin(); it != vec.end(); it++) {
+            if (it != vec.begin()) {
+                ss << "";
+            }
+            ss << *it;
+        }
+
+        unsigned int const number_of_digits = 4;
+        //10種の数字からなる文字列のうち4つ選択する
+        string selection = ss.str().substr(0, number_of_digits);
+
+        string guess;
+        for (int t = 1; t <= 8; ++t)
+        {
+            //8回目までに正解出来ない場合負けとなる
+            if (t == 8)
+            {
+                cout << "あなたの負けです!" << endl;
+                return;
+            }
+            //推測した数を入力する
+            cout << t << "回目\n" << "4桁の数字を答えてね! ", getline(cin, guess);
+            //想定外の入力を排除する
+            if (guess.length() != number_of_digits
+                || guess.find_first_of(ss.str()) == string::npos
+                || duplication(guess))
+            {
+                cout << guess << " 適切な数字ではありません！\n";
+                t--;
+                continue;
+            }
+            //HitとBlowの数を数える
+            unsigned int Hit = 0;
+            unsigned int Blow = 0;
+            for (index i = 0; i < number_of_digits; ++i)
+            {
+                index pos = selection.find(guess[i]);
+                if (pos == i)
+                    ++Hit;
+                else if (pos != string::npos)
+                    ++Blow;
+            }
+            cout << Hit << " Hit, " << Blow << " Blow.\n";
+            //Hit=4となるとき勝ちとなる
+            if (Hit == number_of_digits)
+            {
+                cout << "正解です！おめでとう！\n";
+                return;
+            }
+        }
+    }
+};
+
+int main()
+{
+    cout << "ようこそNumer0nへ!\nプレイしますか? ";
+    string answer;
+    while (true)
+    {
+        while (true)
+        {
+            if (!std::getline(cin, answer))
+            {
+                cout << "I can't get an answer. Exiting.\n";
+                return EXIT_FAILURE;
+            }
+            if (answer == "はい")
+                break;
+            if (answer == "いいえ")
+            {
+                cout << "また遊んでね！\n";
+                return EXIT_SUCCESS;
+            }
+            cout << "はい か いいえで答えてね！: ";
+        }
+        //メンバ関数を呼び出す
+        CGame now_data;
+        now_data.game();
+        cout << "もう一度遊ぶ?\n ";
+    }
+}
